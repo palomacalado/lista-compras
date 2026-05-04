@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Lista de Compras </title>
+<title>Lista de Compras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -642,29 +642,21 @@ function categorize(name) {
 }
 
 // ═══════════════════════════════
-// ADD ITEM
+// ADD ITEM (single)
 // ═══════════════════════════════
-function addItem(nameOverride) {
-  const input = document.getElementById('addInput');
-  const name = (nameOverride || input.value).trim();
-  if (!name) return;
+function addSingleItem(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
 
-  const sectorId = categorize(name);
-  const sector = SECTORS.find(s => s.id === sectorId);
-
+  const sectorId = categorize(trimmed);
   const item = {
     id: Date.now() + Math.random(),
-    name,
+    name: trimmed,
     sectorId,
     checked: false,
     new: true,
   };
-
   items.unshift(item);
-  save();
-  render();
-  input.value = '';
-  showToast(`${sector.emoji} ${name} → ${sector.name}`);
 
   // Remove new flag after animation
   setTimeout(() => {
@@ -672,6 +664,37 @@ function addItem(nameOverride) {
     save();
     render();
   }, 2000);
+
+  return item;
+}
+
+// ═══════════════════════════════
+// ADD ITEM (from input — suporta múltiplos por vírgula)
+// ═══════════════════════════════
+function addItem(textOverride) {
+  const input = document.getElementById('addInput');
+  const raw = (textOverride !== undefined ? textOverride : input.value).trim();
+  if (!raw) return;
+
+  // Divide por vírgula, "e", ponto e vírgula
+  const parts = raw.split(/[,;]|\s+e\s+/i).map(s => s.trim()).filter(Boolean);
+
+  const added = [];
+  for (const part of parts) {
+    const item = addSingleItem(part);
+    if (item) added.push(item);
+  }
+
+  save();
+  render();
+  input.value = '';
+
+  if (added.length === 1) {
+    const sector = SECTORS.find(s => s.id === added[0].sectorId);
+    showToast(`${sector.emoji} ${added[0].name} → ${sector.name}`);
+  } else if (added.length > 1) {
+    showToast(`🛒 ${added.length} itens adicionados!`);
+  }
 }
 
 function toggleItem(id) {
@@ -808,9 +831,20 @@ function checkUrlParams() {
   if (addParam) {
     const decoded = decodeURIComponent(addParam).trim();
     if (decoded) {
-      addItem(decoded);
-      showToast(`🎙️ Siri adicionou: ${decoded}`);
-      // Clean URL without reload
+      const parts = decoded.split(/[,;]|\s+e\s+/i).map(s => s.trim()).filter(Boolean);
+      const added = [];
+      for (const part of parts) {
+        const item = addSingleItem(part);
+        if (item) added.push(item);
+      }
+      save();
+      render();
+      if (added.length === 1) {
+        const sector = SECTORS.find(s => s.id === added[0].sectorId);
+        showToast(`🎙️ ${sector.emoji} ${added[0].name} → ${sector.name}`);
+      } else if (added.length > 1) {
+        showToast(`🎙️ Siri adicionou ${added.length} itens!`);
+      }
       window.history.replaceState({}, '', window.location.pathname);
     }
   }
