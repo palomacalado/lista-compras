@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Lista de Compras </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #17171a;
+    --surface2: #1f1f24;
+    --border: #2a2a30;
+    --accent: #ff6b35;
+    --accent2: #ffaa70;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --yellow: #fbbf24;
+    --pink: #f472b6;
+    --text: #f0f0f2;
+    --muted: #6b6b78;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding-bottom: 100px;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(13,13,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 12px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .badge-count {
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* SIRI BANNER */
+  .siri-banner {
+    margin: 16px 16px 0;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a50;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .siri-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(100,100,255,0.08), transparent);
+  }
+
+  .siri-banner:active { opacity: 0.7; }
+
+  .siri-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #5e5ce6, #bf5af2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(94,92,230,0.4);
+  }
+
+  .siri-text h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #a5a5ff;
+    margin-bottom: 2px;
+  }
+
+  .siri-text p {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .siri-chevron {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* ADD FORM */
+  .add-form {
+    margin: 12px 16px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .add-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-input:focus { border-color: var(--accent); }
+  .add-input::placeholder { color: var(--muted); }
+
+  .add-btn {
+    width: 46px;
+    height: 46px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s, opacity 0.2s;
+  }
+
+  .add-btn:active { transform: scale(0.93); opacity: 0.85; }
+
+  /* SECTIONS */
+  .sections { padding: 0 16px; }
+
+  .section { margin-bottom: 20px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  .section-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .section-qty {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  /* ITEMS */
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: opacity 0.3s, transform 0.3s;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .item.checked {
+    opacity: 0.45;
+  }
+
+  .item.checked .item-name {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .item-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: transparent;
+  }
+
+  .item.checked .item-check {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .item-check::after {
+    content: '✓';
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .item.checked .item-check::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .item-emoji { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+
+  .item-info { flex: 1; min-width: 0; }
+
+  .item-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+  }
+
+  .item-sector {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .item-delete {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .item-delete:active { background: rgba(255,100,100,0.15); color: #ff6b6b; }
+
+  /* EMPTY */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty h3 { font-family: 'Syne', sans-serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
+  .empty p { font-size: 14px; line-height: 1.5; }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+  }
+
+  .bottom-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .bottom-btn:active { opacity: 0.7; }
+
+  .bottom-btn.danger { border-color: rgba(255,100,100,0.3); color: #ff6b6b; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 100;
+    align-items: flex-end;
+    padding: 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    animation: modalUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modalUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .modal p { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 26px;
+    height: 26px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    color: white;
+  }
+
+  .step-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .step-text strong { color: var(--accent2); }
+  .step-text code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .modal-close {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: opacity 0.2s;
+  }
+
+  .modal-close:active { opacity: 0.8; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--green);
+    color: #0d0d0f;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 99px;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* NEW ITEM PULSE */
+  .item.new-arrival {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Lista <span>Compras</span></div>
+    <div class="badge-count" id="countBadge">0 itens</div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- SIRI BANNER -->
+<div class="siri-banner" onclick="openSiriModal()">
+  <div class="siri-icon">🎙️</div>
+  <div class="siri-text">
+    <h3>Integração com Siri</h3>
+    <p>Configure para adicionar itens com a voz</p>
+  </div>
+  <div class="siri-chevron">›</div>
+</div>
+
+<!-- ADD FORM -->
+<div class="add-form">
+  <input class="add-input" id="addInput" type="text" placeholder="Ex: sabonete, arroz 2kg..." 
+    onkeydown="if(event.key==='Enter')addItem()">
+  <button class="add-btn" onclick="addItem()">+</button>
+</div>
+
+<!-- LISTS -->
+<div class="sections" id="sections"></div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="bottom-btn" onclick="clearChecked()">🧹 Limpar marcados</button>
+  <button class="bottom-btn danger" onclick="clearAll()">🗑️ Limpar tudo</button>
+</div>
+
+<!-- SIRI MODAL -->
+<div class="modal-overlay" id="siriModal" onclick="closeSiriModal(event)">
+  <div class="modal">
+    <h2>🎙️ Siri + Atalhos</h2>
+    <p>Configure uma vez e use sua voz para adicionar itens à lista:</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        Abra o app <strong>Atalhos</strong> no seu iPhone e toque em <strong>"+"</strong> para criar novo atalho.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Adicione a ação <strong>"Obter entrada do atalho"</strong> — isso vai capturar o que você ditar para a Siri.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Adicione a ação <strong>"Abrir URL"</strong> com o endereço:<br>
+        <code id="urlExample">https://seusite.com/lista?add=</code> + a entrada capturada
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        Dê um nome como <strong>"Lista de Compras"</strong> e adicione à Siri. Depois é só falar:<br>
+        <strong>"Ei Siri, Lista de Compras"</strong> e ditar o item.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-text">
+        Enquanto isso, use o parâmetro <code>?add=sabonete</code> na URL desta página para testar agora mesmo! O item é categorizado automaticamente por IA.
+      </div>
+    </div>
+
+    <button class="modal-close" onclick="closeSiriModal()">Entendi!</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// CATEGORIAS / SETORES
+// ═══════════════════════════════
+const SECTORS = [
+  { id: 'higiene',    name: 'Higiene & Beleza',   color: '#a78bfa', emoji: '🧴',
+    keywords: ['sabonete','shampoo','condicionador','desodorante','pasta','escova','absorvente','creme','perfume','fio dental','maquiagem','hidratante','protetor solar','barbeador','aparelho de barbear','lenço','papel higiênico'] },
+  { id: 'limpeza',   name: 'Limpeza',             color: '#60a5fa', emoji: '🧹',
+    keywords: ['detergente','desinfetante','alvejante','água sanitária','sabão','esponja','vassoura','rodo','pano','multiuso','amaciante','lava-louças','luva','saco de lixo','lixo','limpa'] },
+  { id: 'hortifruti',name: 'Hortifruti',          color: '#4ade80', emoji: '🥦',
+    keywords: ['alface','tomate','cebola','alho','cenoura','batata','limão','laranja','banana','maçã','uva','abacaxi','mamão','melancia','brócolis','espinafre','couve','rúcula','pimentão','pepino','vagem','ervilha','milho','beterraba','abobrinha','berinjela','chuchu','jiló','quiabo'] },
+  { id: 'carnes',    name: 'Carnes & Frios',      color: '#f472b6', emoji: '🥩',
+    keywords: ['frango','carne','picanha','alcatra','file','filé','peito','coxa','costela','hambúrguer','linguiça','salsicha','presunto','mortadela','salame','atum','sardinha','camarão','peixe','bacon','calabresa','bisteca','patinho'] },
+  { id: 'laticinios',name: 'Laticínios',          color: '#fbbf24', emoji: '🧀',
+    keywords: ['leite','queijo','iogurte','manteiga','requeijão','creme de leite','nata','mussarela','parmesão','cottage','ricota','coalhada','ovos'] },
+  { id: 'mercearia', name: 'Mercearia',           color: '#ff6b35', emoji: '🛒',
+    keywords: ['arroz','feijão','macarrão','farinha','açúcar','sal','azeite','óleo','vinagre','molho','ketchup','maionese','mostarda','shoyu','extrato de tomate','tempero','pimenta','canela','orégano','fermento','amido','leite condensado','caldo'] },
+  { id: 'padaria',   name: 'Padaria & Cereais',   color: '#34d399', emoji: '🍞',
+    keywords: ['pão','biscoito','bolacha','cereal','granola','aveia','torrada','croissant','bolo','bisnaguinha','tapioca','cuscuz','farelo'] },
+  { id: 'bebidas',   name: 'Bebidas',             color: '#38bdf8', emoji: '🥤',
+    keywords: ['água','suco','refrigerante','cerveja','vinho','café','chá','achocolatado','isotônico','energético','coco','limonada'] },
+  { id: 'congelados',name: 'Congelados',          color: '#818cf8', emoji: '🧊',
+    keywords: ['pizza','lasanha','nuggets','batata frita','sorvete','estrogonofe','pão de queijo','pastel','coxinha'] },
+  { id: 'outros',    name: 'Outros',              color: '#94a3b8', emoji: '📦',
+    keywords: [] },
+];
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let items = JSON.parse(localStorage.getItem('lista_sola') || '[]');
+
+function save() {
+  localStorage.setItem('lista_sola', JSON.stringify(items));
+}
+
+// ═══════════════════════════════
+// CATEGORIZER
+// ═══════════════════════════════
+function categorize(name) {
+  const lower = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for (const sector of SECTORS) {
+    if (sector.id === 'outros') continue;
+    for (const kw of sector.keywords) {
+      const normKw = kw.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (lower.includes(normKw)) return sector.id;
+    }
+  }
+  return 'outros';
+}
+
+// ═══════════════════════════════
+// ADD ITEM
+// ═══════════════════════════════
+function addItem(nameOverride) {
+  const input = document.getElementById('addInput');
+  const name = (nameOverride || input.value).trim();
+  if (!name) return;
+
+  const sectorId = categorize(name);
+  const sector = SECTORS.find(s => s.id === sectorId);
+
+  const item = {
+    id: Date.now() + Math.random(),
+    name,
+    sectorId,
+    checked: false,
+    new: true,
+  };
+
+  items.unshift(item);
+  save();
+  render();
+  input.value = '';
+  showToast(`${sector.emoji} ${name} → ${sector.name}`);
+
+  // Remove new flag after animation
+  setTimeout(() => {
+    item.new = false;
+    save();
+    render();
+  }, 2000);
+}
+
+function toggleItem(id) {
+  const item = items.find(i => i.id === id);
+  if (item) { item.checked = !item.checked; save(); render(); }
+}
+
+function deleteItem(id) {
+  items = items.filter(i => i.id !== id);
+  save();
+  render();
+}
+
+function clearChecked() {
+  const before = items.length;
+  items = items.filter(i => !i.checked);
+  save();
+  render();
+  if (items.length < before) showToast('✨ Marcados removidos!');
+}
+
+function clearAll() {
+  if (items.length === 0) return;
+  if (confirm('Limpar toda a lista?')) {
+    items = [];
+    save();
+    render();
+    showToast('🗑️ Lista limpa!');
+  }
+}
+
+// ═══════════════════════════════
+// RENDER
+// ═══════════════════════════════
+function render() {
+  const total = items.length;
+  const checked = items.filter(i => i.checked).length;
+  const pct = total === 0 ? 0 : Math.round((checked / total) * 100);
+
+  document.getElementById('countBadge').textContent = 
+    total === 0 ? '0 itens' : `${checked}/${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const container = document.getElementById('sections');
+
+  if (total === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🛒</div>
+        <h3>Lista vazia</h3>
+        <p>Adicione itens acima ou use a Siri<br>para preencher sua lista de compras.</p>
+      </div>`;
+    return;
+  }
+
+  // Group by sector (only sectors that have items)
+  const bySector = {};
+  for (const item of items) {
+    if (!bySector[item.sectorId]) bySector[item.sectorId] = [];
+    bySector[item.sectorId].push(item);
+  }
+
+  // Order: unchecked sectors first
+  const orderedSectors = SECTORS.filter(s => bySector[s.id]);
+
+  let html = '';
+  for (const sector of orderedSectors) {
+    const sectorItems = bySector[sector.id];
+    const unchecked = sectorItems.filter(i => !i.checked);
+    const chk = sectorItems.filter(i => i.checked);
+    const ordered = [...unchecked, ...chk];
+
+    html += `<div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background:${sector.color}"></div>
+        <span class="section-name">${sector.emoji} ${sector.name}</span>
+        <span class="section-qty">${sectorItems.length}</span>
+      </div>`;
+
+    for (const item of ordered) {
+      html += `<div class="item${item.checked ? ' checked' : ''}${item.new ? ' new-arrival' : ''}" id="item-${item.id}">
+        <div class="item-check" onclick="toggleItem(${item.id})"></div>
+        <div class="item-emoji">${sector.emoji}</div>
+        <div class="item-info">
+          <div class="item-name">${escapeHtml(item.name)}</div>
+          <div class="item-sector">${sector.name}</div>
+        </div>
+        <button class="item-delete" onclick="deleteItem(${item.id})">✕</button>
+      </div>`;
+    }
+
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════
+// TOAST
+// ═══════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════
+// MODAL
+// ═══════════════════════════════
+function openSiriModal() {
+  document.getElementById('urlExample').textContent = window.location.href.split('?')[0] + '?add=';
+  document.getElementById('siriModal').classList.add('open');
+}
+
+function closeSiriModal(e) {
+  if (!e || e.target.id === 'siriModal') {
+    document.getElementById('siriModal').classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════
+// URL PARAMS (Siri shortcut)
+// ═══════════════════════════════
+function checkUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const addParam = params.get('add');
+  if (addParam) {
+    const decoded = decodeURIComponent(addParam).trim();
+    if (decoded) {
+      addItem(decoded);
+      showToast(`🎙️ Siri adicionou: ${decoded}`);
+      // Clean URL without reload
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+render();
+checkUrlParams();
+</script>
+</body>
+</html>
